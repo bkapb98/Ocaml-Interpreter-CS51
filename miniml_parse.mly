@@ -27,6 +27,7 @@
 %nonassoc EQUALS
 %left PLUS MINUS
 %left TIMES
+%left NEG
 
 %start input
 %type <Expr.expr> input
