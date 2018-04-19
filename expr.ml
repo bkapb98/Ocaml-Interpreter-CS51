@@ -1,17 +1,17 @@
-(* 
+(*
                          CS 51 Final Project
                         MiniML -- Expressions
                              Spring 2018
 *)
 
 (*......................................................................
-  Abstract syntax of MiniML expressions 
+  Abstract syntax of MiniML expressions
  *)
 
 type unop =
   | Negate
 ;;
-    
+
 type binop =
   | Plus
   | Minus
@@ -19,7 +19,7 @@ type binop =
   | Equals
   | LessThan
 ;;
-      
+
 type expr =
   | Var of varid                         (* variables *)
   | Num of int                           (* integers *)
@@ -34,7 +34,7 @@ type expr =
   | Unassigned                           (* (temporarily) unassigned *)
   | App of expr * expr                   (* function applications *)
  and varid = string ;;
-  
+
 (*......................................................................
   Manipulation of variable names (varids)
  *)
@@ -58,13 +58,13 @@ let same_vars : varidset -> varidset -> bool =
    testing purposes) *)
 let vars_of_list : string list -> varidset =
   SS.of_list ;;
-  
+
 (* free_vars : expr -> varidset
    Return a set of the variable names that are free in expression
    exp *)
 let free_vars (exp : expr) : varidset =
   failwith "free_vars not implemented" ;;
-  
+
 (* new_varname : unit -> varid
    Return a fresh variable, constructed with a running counter a la
    gensym. Assumes no variable names use the prefix "var". (Otherwise,
@@ -73,7 +73,7 @@ let new_varname () : varid =
   failwith "new_varname not implemented" ;;
 
 (*......................................................................
-  Substitution 
+  Substitution
 
   Substitution of expressions for free occurrences of variables is the
   cornerstone of the substitution model for functional programming
@@ -88,8 +88,8 @@ let subst (var_name : varid) (repl : expr) (exp : expr) : expr =
 (*......................................................................
   String representations of expressions
  *)
-   
-    
+
+
 (* exp_to_concrete_string : expr -> string
    Returns a concrete syntax string representation of the expr *)
 let exp_to_concrete_string (exp : expr) : string =
@@ -97,5 +97,26 @@ let exp_to_concrete_string (exp : expr) : string =
 
 (* exp_to_abstract_string : expr -> string
    Returns a string representation of the abstract syntax of the expr *)
-let exp_to_abstract_string (exp : expr) : string =
-  failwith "exp_to_abstract_string not implemented" ;;
+let rec exp_to_abstract_string (exp : expr) : string =
+  match exp with
+  | Var x -> "Var " ^ x
+  | Num x -> " Num " ^ string_of_int x
+  | Bool x -> "Bool " ^ string_of_bool x
+  | Unop (u, e) -> "Unop(u, " ^ exp_to_abstract_string e  ^ ")"
+  | Binop (b, e, e1) -> "Binop(b," ^ exp_to_abstract_string e  ^ ", "
+                        ^ exp_to_abstract_string e1 ^ ")"
+  | Conditional (e, e1, e2) -> "Conditional(" ^ exp_to_abstract_string e  ^
+    "," ^ exp_to_abstract_string e1  ^ "," ^ exp_to_abstract_string e2 ^ ")"
+  | Fun (x, e) -> "Fun(" ^ x ^ "," ^ exp_to_abstract_string e ^ ")"
+  | Let (x, e, e1) -> "Let(" ^ x  ^ "," ^ exp_to_abstract_string e ^ "," ^
+    exp_to_abstract_string e ^  ")"
+  | Letrec (x, e, e1) -> "Letrec(" ^ x  ^ "," ^ exp_to_abstract_string e ^ "," ^
+    exp_to_abstract_string e ^  ")"
+  | Raise -> "Raise"
+  | Unassigned -> "Unassigned"
+  | App (e, e1) -> "App(" ^ exp_to_abstract_string e ^ "," ^
+    exp_to_abstract_string e ^  ")"
+
+
+
+
