@@ -102,21 +102,18 @@ let rec exp_to_abstract_string (exp : expr) : string =
   | Var x -> "Var " ^ x
   | Num x -> " Num " ^ string_of_int x
   | Bool x -> "Bool " ^ string_of_bool x
-  | Unop (u, e) -> "Unop(u, " ^ exp_to_abstract_string e  ^ ")"
-  | Binop (b, e, e1) -> "Binop(b," ^ exp_to_abstract_string e  ^ ", "
+  | Unop (u, e) -> "Unop (u, " ^ exp_to_abstract_string e  ^ ")"
+  | Binop (b, e, e1) -> "Binop (b," ^ exp_to_abstract_string e  ^ ", "
                         ^ exp_to_abstract_string e1 ^ ")"
-  | Conditional (e, e1, e2) -> "Conditional(" ^ exp_to_abstract_string e  ^
+  | Conditional (e, e1, e2) -> "Conditional (" ^ exp_to_abstract_string e  ^
     "," ^ exp_to_abstract_string e1  ^ "," ^ exp_to_abstract_string e2 ^ ")"
-  | Fun (x, e) -> "Fun(" ^ x ^ "," ^ exp_to_abstract_string e ^ ")"
-  | Let (x, e, e1) -> "Let(" ^ x  ^ "," ^ exp_to_abstract_string e ^ "," ^
+  | Fun (x, e) -> "Fun (" ^ x ^ "," ^ exp_to_abstract_string e ^ ")"
+  | Let (x, e, e1) -> "Let (" ^ x  ^ "," ^ exp_to_abstract_string e ^ "," ^
     exp_to_abstract_string e ^  ")"
-  | Letrec (x, e, e1) -> "Letrec(" ^ x  ^ "," ^ exp_to_abstract_string e ^ "," ^
+  | Letrec (x, e, e1) -> "Letrec (" ^ x  ^ "," ^ exp_to_abstract_string e ^ "," ^
     exp_to_abstract_string e ^  ")"
   | Raise -> "Raise"
   | Unassigned -> "Unassigned"
-  | App (e, e1) -> "App(" ^ exp_to_abstract_string e ^ "," ^
-    exp_to_abstract_string e ^  ")"
-
-
-
+  | App (e, e1) -> "App (" ^ exp_to_abstract_string e ^ "," ^
+    exp_to_abstract_string e ^  ")" ;;
 
