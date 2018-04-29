@@ -103,19 +103,36 @@ let new_varname () : varid =
 
 (* subst : varid -> expr -> expr -> expr
    Substitute repl for free occurrences of var_name in exp *)
-let subst (var_name : varid) (repl : expr) (exp : expr) : expr =
-  | Var x -> Var x
-  | Num x -> Num x
-  | Bool x -> Bool x
-  | Unop (u, e) ->
-  | Binop (, e, e1) ->
-  | Conditional (e, e1, e2) ->
+let rec subst (var_name : varid) (repl : expr) (exp : expr) : expr =
+  match exp with
+  | Var x -> if var_name = x then repl else exp
+  | Num x -> exp
+  | Bool x -> exp
+  | Unop (u, e) -> Unop(u, subst var_name repl e)
+  | Binop (b, e, e1) ->
+    Binop(b, subst var_name repl e, subst var_name repl e1)
+  | Conditional (e, e1, e2) -> Conditional (subst var_name repl e,
+    subst var_name repl e1, subst var_name repl e2)
   | Fun (x, e) ->
+    if var_name = x then exp
+    else if SS.mem x (free_vars repl) then (subst (new_varname()) repl exp)
+    else Fun (x, subst var_name repl e)
   | Let (x, e, e1) ->
+    if var_name = x then exp
+    else if SS.mem x (free_vars repl) then
+      let a = new_varname() in
+      Let (a, e, subst var_name repl (subst x (Var a) e1))
+    else Let (x, subst var_name repl e, subst var_name repl e1)
   | Letrec (x, e, e1) ->
-  | Raise ->
-  | Unassigned ->
-  | App (e, e1) ->  ;;
+    if var_name = x then exp
+    else if SS.mem x (free_vars repl) then
+      let a = new_varname() in
+      Let (a, subst var_name repl (subst x (Var a) e),
+        subst var_name repl (subst x (Var a) e1))
+    else Letrec (x, subst var_name repl e, subst var_name repl e1)
+  | Raise -> Raise
+  | Unassigned -> Unassigned
+  | App (e, e1) -> App(subst var_name repl e, subst var_name repl e1);;
 
 (*......................................................................
   String representations of expressions
@@ -136,11 +153,11 @@ let exp_to_concrete_string (exp : expr) : string =
      | Negate -> "-") ^ help e
   | Binop (b, e, e1) -> "(" ^ help e ^ ")" ^
     (match b with
-     | Plus -> " + "
-     | Minus -> " - "
-     | Times -> " * "
-     | Equals -> " = "
-     | LessThan -> " > ")  ^ "(" ^ help e1 ^ ")"
+     | Plus -> "+"
+     | Minus -> "-"
+     | Times -> "*"
+     | Equals -> "="
+     | LessThan -> ">")  ^ "(" ^ help e1 ^ ")"
   | Conditional (e, e1, e2) ->
     "(if" ^ "(" ^ help e ^ ")" ^ "then" ^ "(" ^ help e1 ^ ")"  ^
      "else" ^ "(" ^ help e2 ^ ")"  ^ ")"
@@ -159,18 +176,18 @@ let exp_to_concrete_string (exp : expr) : string =
 let rec exp_to_abstract_string (exp : expr) : string =
   match exp with
   | Var x -> "Var(" ^ x ^ ")"
-  | Num x -> " Num(" ^ string_of_int x ^ ")"
+  | Num x -> "Num(" ^ string_of_int x ^ ")"
   | Bool x -> "Bool(" ^ string_of_bool x ^ ")"
   | Unop (u, e) -> "Unop(" ^
     (match u with
      | Negate -> "Negate") ^ ", " ^ exp_to_abstract_string e  ^ ")"
   | Binop (b, e, e1) -> "Binop(" ^
     (match b with
-     | Plus -> "Plus "
-     | Minus -> "Minus "
-     | Times -> " Times "
-     | Equals -> " Equals "
-     | LessThan -> " LessThan ") ^ "," ^ exp_to_abstract_string e  ^ ", "
+     | Plus -> "Plus"
+     | Minus -> "Minus"
+     | Times -> "Times"
+     | Equals -> "Equals"
+     | LessThan -> "LessThan") ^ ", " ^ exp_to_abstract_string e  ^ ", "
         ^ exp_to_abstract_string e1 ^ ")"
   | Conditional (e, e1, e2) -> "Conditional(" ^ exp_to_abstract_string e  ^
     "," ^ exp_to_abstract_string e1  ^ ", " ^ exp_to_abstract_string e2 ^ ")"
