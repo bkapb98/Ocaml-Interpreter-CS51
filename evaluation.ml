@@ -50,27 +50,35 @@ module Env : Env_type =
 
     (* Looks up the value of a variable in the environment *)
     let lookup (env : env) (varname : varid) : value =
-      match List.find (fun (x, _) -> x = varname) env with
-      | (_, y) -> !y
-      | _ -> raise (EvalError "value undefined") ;;
+      try
+        let _, y = List.find (fun (x, _) -> x = varname) env in !y
+      with
+        Not_found -> raise (EvalError "var not found") ;;
 
     (* Returns a new environment just like env except that it maps the
        variable varid to loc *)
     let extend (env : env) (varname : varid) (loc : value ref) : env =
-      List.map (fun (x, y) -> if x = varname then y := loc else (x, y)) env ;;
+      let new_env = List.remove_assoc varname env in
+        (varname, loc) :: new_env ;;
 
     (* Returns a printable string representation of a value; the flag
        printenvp determines whether to include the environment in the
        string representation when called on a closure *)
-    let value_to_string ?(printenvp : bool = true) (v : value) : string =
-      if printenvp then
-        let Env.Val (x, loc) = v in "(" ^ exp_to_concrete_string x ^ "," ^
-          string_of_bool printenvp ^ ")"
-      else ;;
+    let rec value_to_string ?(printenvp : bool = true) (v : value) : string =
+      match v with
+      | Val x -> "Val" ^ exp_to_concrete_string x
+      | Closure (x, loc) ->
+        if printenvp then
+          "(" ^ exp_to_concrete_string x ^ ", " ^ env_to_string loc ^ ")"
+        else value_to_string (Val x)
+
 
     (* Returns a printable string representation of an environment *)
-    let env_to_string (env : env) : string =
-      List.iter (fun x -> ) ;;
+    and env_to_string (env : env) : string =
+      match env with
+      | [] -> "]"
+      | (x, loc) :: tl ->
+        "(" ^ x ^ ", " ^ value_to_string !loc ^ env_to_string tl ;;
   end
 ;;
 

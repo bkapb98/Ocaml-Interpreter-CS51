@@ -145,7 +145,7 @@ let rec subst (var_name : varid) (repl : expr) (exp : expr) : expr =
 let exp_to_concrete_string (exp : expr) : string =
   let rec help (exp : expr) : string =
   match exp with
-  | Var x -> "x"
+  | Var x -> x
   | Num x -> string_of_int x
   | Bool x -> string_of_bool x
   | Unop (u, e) ->
