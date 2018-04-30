@@ -46,26 +46,31 @@ module Env : Env_type =
     (* Creates a closure from an expression and the environment it's
        defined in *)
     let close (exp : expr) (env : env) : value =
-      failwith "close not implemented" ;;
+      Closure (exp, env) ;;
 
     (* Looks up the value of a variable in the environment *)
     let lookup (env : env) (varname : varid) : value =
-      failwith "lookup not implemented" ;;
+      match List.find (fun (x, _) -> x = varname) env with
+      | (_, y) -> !y
+      | _ -> raise (EvalError "value undefined") ;;
 
     (* Returns a new environment just like env except that it maps the
        variable varid to loc *)
     let extend (env : env) (varname : varid) (loc : value ref) : env =
-      failwith "extend not implemented" ;;
+      List.map (fun (x, y) -> if x = varname then y := loc else (x, y)) env ;;
 
     (* Returns a printable string representation of a value; the flag
        printenvp determines whether to include the environment in the
        string representation when called on a closure *)
     let value_to_string ?(printenvp : bool = true) (v : value) : string =
-      failwith "value_to_string not implemented" ;;
+      if printenvp then
+        let Env.Val (x, loc) = v in "(" ^ exp_to_concrete_string x ^ "," ^
+          string_of_bool printenvp ^ ")"
+      else ;;
 
     (* Returns a printable string representation of an environment *)
     let env_to_string (env : env) : string =
-      failwith "env_to_string not implemented" ;;
+      List.iter (fun x -> ) ;;
   end
 ;;
 
@@ -94,36 +99,48 @@ let eval_t (exp : expr) (_env : Env.env) : Env.value =
   Env.Val exp ;;
 
 (* The SUBSTITUTION MODEL evaluator -- to be completed *)
-
 let eval_s (exp : expr) (_env : Env.env) : Env.value =
-(*   match exp with
-  | Var x -> raise EvalError ("Doesn't evaluate")
-  | Num x -> Env.Val (Num x)
-  | Bool x -> Env.Val (Bool x)
-  | Unop (u, (Num x)) -> Env.Val
+  let rec help (exp : expr) : expr =
+  match exp with
+  | Var _ -> raise (EvalError "Doesn't evaluate")
+  | Num _ -> exp
+  | Bool _ -> exp
+  | Unop (u, e) ->
     (match u with
-     | Negate -> (Num ~-x))
+     | Negate -> match e with
+                 | Num x -> Num (~-x)
+                 | Bool x -> Bool (not x)
+                 | _ -> raise (EvalError "Invalid unop type"))
   | Binop (b, e, e1) ->
-    match e, e1 with
-    | Num y, Num z -> Env.Val (
-      (match b with
-       | Plus -> ( + )
-       | Minus -> ( - )
-       | Times -> ( * )
-       | Equals -> ( = )
-       | LessThan -> ( < )) y z)
-    | Bool y, Bool z -> Env.Val (
-      (match b with
-       | Equals -> y = z))
-    | _, _ -> raise EvalError ("Binop's only take Nums or Bools")
+    (match help e, help e1 with
+     | Num y, Num z ->
+       (match b with
+        | Plus -> Num (y + z)
+        | Minus -> Num (y - z)
+        | Times -> Num (y * z)
+        | Equals -> Bool (y = z)
+        | LessThan -> Bool (y < z))
+     | Bool y, Bool z ->
+       (match b with
+        | Equals -> Bool (y = z)
+        | LessThan -> Bool (y < z)
+        | _ -> raise (EvalError "This binop can not be used with type Bool"))
+     | _ -> raise (EvalError "Binop's only take Nums or Bools"))
   | Conditional (e, e1, e2) ->
-  | Fun (x, e) ->
-  | Let (x, e, e1) ->
+    (match help e with
+     | Bool x -> if x then help e1 else help e2
+     | _ -> raise (EvalError "first term of conditional must be bool"))
+  | Fun (_, _) -> exp
+  | Let (x, e, e1) -> help (subst x (help e) e1)
   | Letrec (x, e, e1) ->
-  | Raise -> raise EvalError ("raise")
-  | Unassigned -> raise EvalError ("unassigned")
-  | App (e, e1) ->  ;; *)
-  failwith "eval_s not implemented" ;;
+      help (subst x (help (subst x (Letrec (x, e, (Var x))) e)) e1)
+  | Raise -> raise (EvalError "raise")
+  | Unassigned -> raise (EvalError "unassigned")
+  | App (e, e1) ->
+    (match help e with
+     | Fun (x, e2) -> help (subst x (help e1) e2)
+     | _ -> raise (EvalError "invalid use of app"))
+  in Env.Val (help exp) ;;
 
 (* The DYNAMICALLY-SCOPED ENVIRONMENT MODEL evaluator -- to be
    completed *)
@@ -145,4 +162,4 @@ let eval_l (_exp : expr) (_env : Env.env) : Env.value =
    above, not the evaluate function, so it doesn't matter how it's set
    when you submit your solution.) *)
 
-let evaluate = eval_t ;;
+let evaluate = eval_s ;;

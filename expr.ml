@@ -110,7 +110,7 @@ let rec subst (var_name : varid) (repl : expr) (exp : expr) : expr =
   | Bool x -> exp
   | Unop (u, e) -> Unop(u, subst var_name repl e)
   | Binop (b, e, e1) ->
-    Binop(b, subst var_name repl e, subst var_name repl e1)
+    Binop (b, subst var_name repl e, subst var_name repl e1)
   | Conditional (e, e1, e2) -> Conditional (subst var_name repl e,
     subst var_name repl e1, subst var_name repl e2)
   | Fun (x, e) ->
@@ -127,12 +127,12 @@ let rec subst (var_name : varid) (repl : expr) (exp : expr) : expr =
     if var_name = x then exp
     else if SS.mem x (free_vars repl) then
       let a = new_varname() in
-      Let (a, subst var_name repl (subst x (Var a) e),
+      Letrec (a, subst var_name repl (subst x (Var a) e),
         subst var_name repl (subst x (Var a) e1))
     else Letrec (x, subst var_name repl e, subst var_name repl e1)
   | Raise -> Raise
   | Unassigned -> Unassigned
-  | App (e, e1) -> App(subst var_name repl e, subst var_name repl e1);;
+  | App (e, e1) -> App (subst var_name repl e, subst var_name repl e1);;
 
 (*......................................................................
   String representations of expressions
@@ -169,7 +169,7 @@ let exp_to_concrete_string (exp : expr) : string =
   | Raise -> "Raise"
   | Unassigned -> "Unassigned"
   | App (e, e1) -> "App(" ^ help e ^ ", " ^
-    help e ^  ")" in help exp ;;
+    help e1 ^  ")" in help exp ;;
 
 (* exp_to_abstract_string : expr -> string
    Returns a string representation of the abstract syntax of the expr *)
@@ -192,12 +192,12 @@ let rec exp_to_abstract_string (exp : expr) : string =
   | Conditional (e, e1, e2) -> "Conditional(" ^ exp_to_abstract_string e  ^
     "," ^ exp_to_abstract_string e1  ^ ", " ^ exp_to_abstract_string e2 ^ ")"
   | Fun (x, e) -> "Fun(" ^ x ^ ", " ^ exp_to_abstract_string e ^ ")"
-  | Let (x, e, e1) -> "Let(" ^ x  ^ ", " ^ exp_to_abstract_string e ^ "," ^
+  | Let (x, e, e1) -> "Let(" ^ x  ^ ", " ^ exp_to_abstract_string e ^ ", " ^
     exp_to_abstract_string e1 ^  ")"
   | Letrec (x, e, e1) -> "Letrec(" ^ x  ^ ", " ^ exp_to_abstract_string e ^
     ", " ^ exp_to_abstract_string e1 ^  ")"
   | Raise -> "Raise"
   | Unassigned -> "Unassigned"
-  | App (e, e1) -> "App(" ^ exp_to_abstract_string e ^ ", " ^
-    exp_to_abstract_string e1 ^  ")" ;;
+  | App (e, e1) -> "App(" ^ (exp_to_abstract_string e) ^ ", " ^
+    (exp_to_abstract_string e1) ^  ")" ;;
 
