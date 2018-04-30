@@ -106,21 +106,20 @@ let eval_t (exp : expr) (_env : Env.env) : Env.value =
   (* coerce the expr, unchanged, into a value *)
   Env.Val exp ;;
 
-(* The SUBSTITUTION MODEL evaluator -- to be completed *)
-let eval_s (exp : expr) (_env : Env.env) : Env.value =
-  let rec help (exp : expr) : expr =
+let unop_eval (exp : expr) : expr =
   match exp with
-  | Var _ -> raise (EvalError "Doesn't evaluate")
-  | Num _ -> exp
-  | Bool _ -> exp
   | Unop (u, e) ->
     (match u with
      | Negate -> match e with
                  | Num x -> Num (~-x)
                  | Bool x -> Bool (not x)
                  | _ -> raise (EvalError "Invalid unop type"))
+  | _ -> raise (EvalError "invalid type") ;;
+
+let binop_eval (exp : expr) : expr =
+match exp with
   | Binop (b, e, e1) ->
-    (match help e, help e1 with
+    (match e, e1 with
      | Num y, Num z ->
        (match b with
         | Plus -> Num (y + z)
@@ -134,6 +133,17 @@ let eval_s (exp : expr) (_env : Env.env) : Env.value =
         | LessThan -> Bool (y < z)
         | _ -> raise (EvalError "This binop can not be used with type Bool"))
      | _ -> raise (EvalError "Binop's only take Nums or Bools"))
+  | _ -> raise (EvalError "invalid type") ;;
+
+(* The SUBSTITUTION MODEL evaluator -- to be completed *)
+let eval_s (exp : expr) (_env : Env.env) : Env.value =
+  let rec help (exp : expr) : expr =
+  match exp with
+  | Var _ -> raise (EvalError "Doesn't evaluate")
+  | Num _ -> exp
+  | Bool _ -> exp
+  | Unop (u, e) -> unop_eval (Unop (u, help e))
+  | Binop (b, e, e1) -> binop_eval (Binop (b, help e, help e1))
   | Conditional (e, e1, e2) ->
     (match help e with
      | Bool x -> if x then help e1 else help e2
@@ -153,8 +163,42 @@ let eval_s (exp : expr) (_env : Env.env) : Env.value =
 (* The DYNAMICALLY-SCOPED ENVIRONMENT MODEL evaluator -- to be
    completed *)
 
-let eval_d (_exp : expr) (_env : Env.env) : Env.value =
-  failwith "eval_d not implemented" ;;
+let rec eval_d (exp : expr) (env : Env.env) : Env.value =
+(*   let a = Env.create () in
+  match exp with
+  | Var x -> Env.lookup a x
+  | Num _ | Bool _ -> Env.Val exp
+  | Unop (u, e) ->
+    (match u with
+     | Negate -> match eval_d e env with
+                 | Env.Val (Num x) -> Env.Val (Num (~-x))
+                 | Env.Val (Bool x) -> Env.Val (Bool (not x))
+                 | _ -> raise (EvalError "Invalid unop type"))
+  | Binop (b, e, e1) ->
+    let Env.Val ev = eval_d e a in
+    let Env.Val ev1 = eval_d e1 a in
+     (match ev, ev1 with
+      | Num y, Num z -> Env.Val
+         (match b with
+          | Plus -> Num (y + z)
+          | Minus -> Num (y - z)
+          | Times -> Num (y * z)
+          | Equals -> Bool (y = z)
+          | LessThan -> Bool (y < z))
+       | Bool y, Bool z -> Env.Val
+         (match b with
+          | Equals -> Bool (y = z)
+          | LessThan -> Bool (y < z)
+          | _ -> raise (EvalError "This binop can not be used with type Bool"))
+       | _ -> raise (EvalError "Binop's only take Nums or Bools"))
+  | Fun (_, _) -> Env.Val exp
+  | Let (x, e, e1) -> Env.expand (x, e)
+  | Letrec (x, e, e1) ->
+  | Raise -> raise (EvalError "raise")
+  | Unassigned -> raise (EvalError "unassigned")
+  | App (e, e1) ->  ;;
+ *)
+ failwith "" ;;
 
 (* The LEXICALLY-SCOPED ENVIRONMENT MODEL evaluator -- optionally
    completed as (part of) your extension *)
