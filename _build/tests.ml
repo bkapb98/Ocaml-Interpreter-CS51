@@ -81,6 +81,8 @@ let q = str_to_exp
   "let f = fun x -> if x > 3 then x / 5 else ~- x in f 7;;" ;;
 let q2 = str_to_exp
   "let f = fun x -> if x < 3 then x / 5 else ~- x in f 7;;" ;;
+let r = str_to_exp ("let x = 3 in let rec f = fun y " ^
+  "-> if y = 0 then 1 else x * f (y - 1) in let x = 2 in f 4;;");;
 
 (* free_vars *)
 let _ =
@@ -152,6 +154,7 @@ let _ =
   assert (eval_s i2 z = Env.Val (Num 56));
   assert (eval_s q z = Env.Val (Num 1));
   assert (eval_s q2 z = Env.Val (Num (~- 7)));
+  assert (eval_s r z = Env.Val (Num 81));
   Printf.printf "6. eval_s tests passed\n" ;;
 
 (* eval_d *)
@@ -167,6 +170,7 @@ let _ =
   assert (eval_d i2 z = Env.Val (Num 40));
   assert (eval_d q z = Env.Val (Num 1));
   assert (eval_d q2 z = Env.Val (Num (~- 7)));
+  assert (eval_d r z = Env.Val (Num 16));
   Printf.printf "7. eval_d tests passed\n" ;;
 
 (* eval_l *)
@@ -182,6 +186,7 @@ let _ =
   assert (eval_l i2 z = Env.Val (Num 56));
   assert (eval_l q z = Env.Val (Num 1));
   assert (eval_l q2 z = Env.Val (Num (~- 7)));
+  assert (eval_l r z = Env.Val (Num 81));
   Printf.printf "8. eval_l tests passed\n" ;;
 
 let _ =
