@@ -8,7 +8,7 @@
     List.iter (fun (key, data) -> Hashtbl.add tbl key data) init;
     tbl
 
-  let keyword_table = 
+  let keyword_table =
     create_hashtable 8 [
                        ("if", IF);
                        ("in", IN);
@@ -23,11 +23,12 @@
                        ("fun", FUNCTION);
                        ("function", FUNCTION)
                      ]
-                     
-  let sym_table = 
+
+  let sym_table =
     create_hashtable 8 [
                        ("=", EQUALS);
                        ("<", LESSTHAN);
+                       (">", GREATERTHAN);
                        (".", DOT);
                        ("->", DOT);
                        (";;", EOF);
@@ -35,15 +36,16 @@
                        ("+", PLUS);
                        ("-", MINUS);
                        ("*", TIMES);
+                       ("/", DIVIDE);
                        ("(", OPEN);
                        (")", CLOSE)
                      ]
 
-# 43 "miniml_lex.ml"
+# 45 "miniml_lex.ml"
 let __ocaml_lex_tables = {
   Lexing.lex_base =
    "\000\000\249\255\250\255\251\255\002\000\021\000\253\255\080\000\
-    \020\000\013\000\014\000";
+    \021\000\013\000\014\000";
   Lexing.lex_backtrk =
    "\255\255\255\255\255\255\255\255\005\000\002\000\255\255\001\000\
     \000\000\255\255\003\000";
@@ -56,11 +58,11 @@ let __ocaml_lex_tables = {
     \000\000\000\000\000\000\000\000\000\000\000\000\000\000\255\255\
     \255\255\000\000\000\000\000\000\000\000\000\000\000\000\000\000\
     \003\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\
-    \006\000\006\000\005\000\005\000\000\000\005\000\005\000\000\000\
+    \006\000\006\000\005\000\005\000\000\000\005\000\005\000\005\000\
     \008\000\008\000\008\000\008\000\008\000\008\000\008\000\008\000\
     \008\000\008\000\000\000\005\000\005\000\005\000\005\000\005\000\
-    \005\000\000\000\005\000\005\000\008\000\008\000\008\000\008\000\
-    \008\000\008\000\008\000\008\000\008\000\008\000\000\000\000\000\
+    \005\000\000\000\005\000\005\000\005\000\008\000\008\000\008\000\
+    \008\000\008\000\008\000\008\000\008\000\008\000\008\000\000\000\
     \005\000\005\000\005\000\005\000\000\000\000\000\000\000\000\000\
     \000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\
     \000\000\007\000\007\000\007\000\007\000\007\000\007\000\007\000\
@@ -100,11 +102,11 @@ let __ocaml_lex_tables = {
     \255\255\255\255\255\255\255\255\255\255\255\255\255\255\009\000\
     \010\000\255\255\255\255\255\255\255\255\255\255\255\255\255\255\
     \000\000\255\255\255\255\255\255\255\255\255\255\255\255\255\255\
-    \000\000\000\000\000\000\000\000\255\255\000\000\000\000\255\255\
+    \000\000\000\000\000\000\000\000\255\255\000\000\000\000\000\000\
     \000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\
     \000\000\000\000\255\255\000\000\000\000\000\000\000\000\005\000\
-    \005\000\255\255\005\000\005\000\008\000\008\000\008\000\008\000\
-    \008\000\008\000\008\000\008\000\008\000\008\000\255\255\255\255\
+    \005\000\255\255\005\000\005\000\005\000\008\000\008\000\008\000\
+    \008\000\008\000\008\000\008\000\008\000\008\000\008\000\255\255\
     \005\000\005\000\005\000\005\000\255\255\255\255\255\255\255\255\
     \255\255\255\255\255\255\255\255\255\255\255\255\255\255\255\255\
     \255\255\000\000\000\000\000\000\000\000\000\000\000\000\000\000\
@@ -158,38 +160,38 @@ and __ocaml_lex_token_rec lexbuf __ocaml_lex_state =
   match Lexing.engine __ocaml_lex_tables __ocaml_lex_state lexbuf with
       | 0 ->
 let
-# 53 "miniml_lex.mll"
+# 55 "miniml_lex.mll"
               inum
-# 164 "miniml_lex.ml"
+# 166 "miniml_lex.ml"
 = Lexing.sub_lexeme lexbuf lexbuf.Lexing.lex_start_pos lexbuf.Lexing.lex_curr_pos in
-# 54 "miniml_lex.mll"
+# 56 "miniml_lex.mll"
         ( let num = int_of_string inum in
           INT num
         )
-# 170 "miniml_lex.ml"
+# 172 "miniml_lex.ml"
 
   | 1 ->
 let
-# 57 "miniml_lex.mll"
+# 59 "miniml_lex.mll"
           word
-# 176 "miniml_lex.ml"
+# 178 "miniml_lex.ml"
 = Lexing.sub_lexeme lexbuf lexbuf.Lexing.lex_start_pos lexbuf.Lexing.lex_curr_pos in
-# 58 "miniml_lex.mll"
+# 60 "miniml_lex.mll"
         ( try
             let token = Hashtbl.find keyword_table word in
-            token 
+            token
           with Not_found ->
             ID word
         )
-# 185 "miniml_lex.ml"
+# 187 "miniml_lex.ml"
 
   | 2 ->
 let
-# 64 "miniml_lex.mll"
+# 66 "miniml_lex.mll"
            symbol
-# 191 "miniml_lex.ml"
+# 193 "miniml_lex.ml"
 = Lexing.sub_lexeme lexbuf lexbuf.Lexing.lex_start_pos lexbuf.Lexing.lex_curr_pos in
-# 65 "miniml_lex.mll"
+# 67 "miniml_lex.mll"
         ( try
             let token = Hashtbl.find sym_table symbol in
             token
@@ -197,34 +199,34 @@ let
             printf "Ignoring unrecognized token: %s\n" symbol;
             token lexbuf
         )
-# 201 "miniml_lex.ml"
+# 203 "miniml_lex.ml"
 
   | 3 ->
-# 72 "miniml_lex.mll"
+# 74 "miniml_lex.mll"
                         ( token lexbuf )
-# 206 "miniml_lex.ml"
+# 208 "miniml_lex.ml"
 
   | 4 ->
-# 73 "miniml_lex.mll"
+# 75 "miniml_lex.mll"
                         ( token lexbuf )
-# 211 "miniml_lex.ml"
+# 213 "miniml_lex.ml"
 
   | 5 ->
 let
-# 74 "miniml_lex.mll"
+# 76 "miniml_lex.mll"
          c
-# 217 "miniml_lex.ml"
+# 219 "miniml_lex.ml"
 = Lexing.sub_lexeme_char lexbuf lexbuf.Lexing.lex_start_pos in
-# 75 "miniml_lex.mll"
+# 77 "miniml_lex.mll"
         ( printf "Ignoring unrecognized character: %c\n" c;
           token lexbuf
         )
-# 223 "miniml_lex.ml"
+# 225 "miniml_lex.ml"
 
   | 6 ->
-# 79 "miniml_lex.mll"
+# 81 "miniml_lex.mll"
         ( raise End_of_file )
-# 228 "miniml_lex.ml"
+# 230 "miniml_lex.ml"
 
   | __ocaml_lex_state -> lexbuf.Lexing.refill_buff lexbuf;
       __ocaml_lex_token_rec lexbuf __ocaml_lex_state

@@ -10,8 +10,10 @@ type token =
   | PLUS
   | MINUS
   | TIMES
+  | DIVIDE
   | LESSTHAN
   | EQUALS
+  | GREATERTHAN
   | IF
   | THEN
   | ELSE

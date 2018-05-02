@@ -16,8 +16,10 @@ type binop =
   | Plus
   | Minus
   | Times
+  | Divide
   | Equals
   | LessThan
+  | GreaterThan
 ;;
 
 type expr =
@@ -106,8 +108,8 @@ let new_varname () : varid =
 let rec subst (var_name : varid) (repl : expr) (exp : expr) : expr =
   match exp with
   | Var x -> if var_name = x then repl else exp
-  | Num x -> exp
-  | Bool x -> exp
+  | Num _ -> exp
+  | Bool _ -> exp
   | Unop (u, e) -> Unop(u, subst var_name repl e)
   | Binop (b, e, e1) ->
     Binop (b, subst var_name repl e, subst var_name repl e1)
@@ -151,21 +153,23 @@ let exp_to_concrete_string (exp : expr) : string =
   | Unop (u, e) ->
     (match u with
      | Negate -> "-") ^ help e
-  | Binop (b, e, e1) -> "(" ^ help e ^ ")" ^
+  | Binop (b, e, e1) -> "(" ^ help e ^
     (match b with
-     | Plus -> "+"
-     | Minus -> "-"
-     | Times -> "*"
-     | Equals -> "="
-     | LessThan -> ">")  ^ "(" ^ help e1 ^ ")"
+     | Plus -> " + "
+     | Minus -> " - "
+     | Times -> " * "
+     | Divide -> " / "
+     | Equals -> " = "
+     | LessThan -> " < "
+     | GreaterThan -> " > ")  ^ help e1 ^ ")"
   | Conditional (e, e1, e2) ->
     "(if" ^ "(" ^ help e ^ ")" ^ "then" ^ "(" ^ help e1 ^ ")"  ^
      "else" ^ "(" ^ help e2 ^ ")"  ^ ")"
   | Fun (x, e) -> "Fun(" ^ x ^ ", " ^ help e ^ ")"
-  | Let (x, e, e1) -> "Let(" ^ x  ^ ", " ^ help e ^ "," ^
-    help e ^  ")"
+  | Let (x, e, e1) -> "Let(" ^ x  ^ ", " ^ help e ^ ", " ^
+    help e1 ^  ")"
   | Letrec (x, e, e1) -> "Letrec(" ^ x  ^ ", " ^ help e ^
-    ", " ^ help e ^  ")"
+    ", " ^ help e1 ^  ")"
   | Raise -> "Raise"
   | Unassigned -> "Unassigned"
   | App (e, e1) -> "App(" ^ help e ^ ", " ^
@@ -186,11 +190,13 @@ let rec exp_to_abstract_string (exp : expr) : string =
      | Plus -> "Plus"
      | Minus -> "Minus"
      | Times -> "Times"
+     | Divide -> "Divide"
      | Equals -> "Equals"
-     | LessThan -> "LessThan") ^ ", " ^ exp_to_abstract_string e  ^ ", "
+     | LessThan -> "LessThan"
+     | GreaterThan -> "GreaterThan") ^ ", " ^ exp_to_abstract_string e  ^ ", "
         ^ exp_to_abstract_string e1 ^ ")"
   | Conditional (e, e1, e2) -> "Conditional(" ^ exp_to_abstract_string e  ^
-    "," ^ exp_to_abstract_string e1  ^ ", " ^ exp_to_abstract_string e2 ^ ")"
+    ", " ^ exp_to_abstract_string e1  ^ ", " ^ exp_to_abstract_string e2 ^ ")"
   | Fun (x, e) -> "Fun(" ^ x ^ ", " ^ exp_to_abstract_string e ^ ")"
   | Let (x, e, e1) -> "Let(" ^ x  ^ ", " ^ exp_to_abstract_string e ^ ", " ^
     exp_to_abstract_string e1 ^  ")"

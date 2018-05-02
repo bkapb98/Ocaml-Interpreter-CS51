@@ -14,8 +14,9 @@
 %token LET DOT IN REC
 %token NEG
 %token PLUS MINUS
-%token TIMES
+%token TIMES DIVIDE
 %token LESSTHAN EQUALS
+%token GREATERTHAN
 %token IF THEN ELSE
 %token FUNCTION
 %token RAISE
@@ -24,9 +25,10 @@
 %token TRUE FALSE
 
 %nonassoc LESSTHAN
+%nonassoc GREATERTHAN
 %nonassoc EQUALS
 %left PLUS MINUS
-%left TIMES
+%left TIMES DIVIDE
 %left NEG
 
 %start input
@@ -46,8 +48,10 @@ expnoapp: INT                   { Num $1 }
         | exp PLUS exp          { Binop(Plus, $1, $3) }
         | exp MINUS exp         { Binop(Minus, $1, $3) }
         | exp TIMES exp         { Binop(Times, $1, $3) }
+        | exp DIVIDE exp        { Binop(Divide, $1, $3) }
         | exp EQUALS exp        { Binop(Equals, $1, $3) }
         | exp LESSTHAN exp      { Binop(LessThan, $1, $3) }
+        | exp GREATERTHAN exp   { Binop(GreaterThan, $1, $3) }
         | NEG exp               { Unop(Negate, $2) }
         | IF exp THEN exp ELSE exp      { Conditional($2, $4, $6) }
         | LET ID EQUALS exp IN exp      { Let($2, $4, $6) }

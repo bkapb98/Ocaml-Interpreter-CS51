@@ -1,4 +1,4 @@
-(* 
+(*
                          CS 51 Final Project
                         MiniML -- Expressions
                              Spring 2018
@@ -16,8 +16,10 @@ type binop =
   | Plus
   | Minus
   | Times
+  | Divide
   | Equals
   | LessThan
+  | GreaterThan
 ;;
 
 (* Expressions *)

@@ -1,12 +1,36 @@
 ### Starting build.
+# Target: miniml.ml.depends, tags: { warn(A-4-33-40-41-42-43-34-44), extension:ml, file:miniml.ml, not_hygienic, ocaml, ocamldep, quiet, strict-sequence, thread, traverse, use_str, use_unix }
+ocamlfind ocamldep -modules miniml.ml > miniml.ml.depends # cached
+# Target: evaluation.ml.depends, tags: { warn(A-4-33-40-41-42-43-34-44), extension:ml, file:evaluation.ml, not_hygienic, ocaml, ocamldep, quiet, strict-sequence, thread, traverse, use_str, use_unix }
+ocamlfind ocamldep -modules evaluation.ml > evaluation.ml.depends # cached
 # Target: expr.mli.depends, tags: { warn(A-4-33-40-41-42-43-34-44), extension:mli, file:expr.mli, not_hygienic, ocaml, ocamldep, quiet, strict-sequence, thread, traverse, use_str, use_unix }
 ocamlfind ocamldep -modules expr.mli > expr.mli.depends # cached
 # Target: expr.cmi, tags: { warn(A-4-33-40-41-42-43-34-44), byte, compile, extension:mli, file:expr.mli, interf, not_hygienic, ocaml, quiet, strict-sequence, thread, traverse, use_str, use_unix }
 ocamlfind ocamlc -c -thread -strict-sequence -w A-4-33-40-41-42-43-34-44 -o expr.cmi expr.mli # cached
+# Target: evaluation.cmo, tags: { warn(A-4-33-40-41-42-43-34-44), byte, compile, extension:cmo, extension:ml, file:evaluation.cmo, file:evaluation.ml, implem, not_hygienic, ocaml, quiet, strict-sequence, thread, traverse, use_str, use_unix }
+ocamlfind ocamlc -c -thread -strict-sequence -w A-4-33-40-41-42-43-34-44 -o evaluation.cmo evaluation.ml # cached
+# Target: miniml_lex.mll, tags: { warn(A-4-33-40-41-42-43-34-44), extension:mll, file:miniml_lex.mll, lexer, not_hygienic, ocaml, ocamllex, quiet, strict-sequence, thread, traverse, use_str, use_unix }
+/Users/benkaplan/.opam/4.06.0/bin/ocamllex.opt -q miniml_lex.mll # cached
+# Target: miniml_lex.ml.depends, tags: { warn(A-4-33-40-41-42-43-34-44), extension:ml, file:miniml_lex.ml, not_hygienic, ocaml, ocamldep, quiet, strict-sequence, thread, traverse, use_str, use_unix }
+ocamlfind ocamldep -modules miniml_lex.ml > miniml_lex.ml.depends # cached
+# Target: miniml_parse.mly, tags: { warn(A-4-33-40-41-42-43-34-44), extension:mly, file:miniml_parse.mly, infer, not_hygienic, ocaml, ocamlyacc, parser, quiet, strict-sequence, thread, traverse, use_str, use_unix }
+/Users/benkaplan/.opam/4.06.0/bin/ocamlyacc miniml_parse.mly # cached
+# Target: miniml_parse.mli.depends, tags: { warn(A-4-33-40-41-42-43-34-44), extension:mli, file:miniml_parse.mli, not_hygienic, ocaml, ocamldep, quiet, strict-sequence, thread, traverse, use_str, use_unix }
+ocamlfind ocamldep -modules miniml_parse.mli > miniml_parse.mli.depends # cached
+# Target: miniml_parse.cmi, tags: { warn(A-4-33-40-41-42-43-34-44), byte, compile, extension:mli, file:miniml_parse.mli, interf, not_hygienic, ocaml, quiet, strict-sequence, thread, traverse, use_str, use_unix }
+ocamlfind ocamlc -c -thread -strict-sequence -w A-4-33-40-41-42-43-34-44 -o miniml_parse.cmi miniml_parse.mli # cached
+# Target: miniml_lex.cmo, tags: { warn(A-4-33-40-41-42-43-34-44), byte, compile, extension:cmo, extension:ml, file:miniml_lex.cmo, file:miniml_lex.ml, implem, not_hygienic, ocaml, quiet, strict-sequence, thread, traverse, use_str, use_unix }
+ocamlfind ocamlc -c -thread -strict-sequence -w A-4-33-40-41-42-43-34-44 -o miniml_lex.cmo miniml_lex.ml # cached
+# Target: miniml.cmo, tags: { warn(A-4-33-40-41-42-43-34-44), byte, compile, extension:cmo, extension:ml, file:miniml.cmo, file:miniml.ml, implem, not_hygienic, ocaml, quiet, strict-sequence, thread, traverse, use_str, use_unix }
+ocamlfind ocamlc -c -thread -strict-sequence -w A-4-33-40-41-42-43-34-44 -o miniml.cmo miniml.ml # cached
 # Target: expr.ml.depends, tags: { warn(A-4-33-40-41-42-43-34-44), extension:ml, file:expr.ml, not_hygienic, ocaml, ocamldep, quiet, strict-sequence, thread, traverse, use_str, use_unix }
 ocamlfind ocamldep -modules expr.ml > expr.ml.depends # cached
 # Target: expr.cmo, tags: { warn(A-4-33-40-41-42-43-34-44), byte, compile, extension:cmo, extension:ml, file:expr.cmo, file:expr.ml, implem, not_hygienic, ocaml, quiet, strict-sequence, thread, traverse, use_str, use_unix }
 ocamlfind ocamlc -c -thread -strict-sequence -w A-4-33-40-41-42-43-34-44 -o expr.cmo expr.ml # cached
-# Target: expr.byte, tags: { warn(A-4-33-40-41-42-43-34-44), byte, dont_link_with, extension:byte, file:expr.byte, link, not_hygienic, ocaml, program, quiet, strict-sequence, thread, traverse, use_str, use_unix }
-ocamlfind ocamlc -linkpkg unix.cma str.cma -thread expr.cmo -o expr.byte # cached
+# Target: miniml_parse.ml.depends, tags: { warn(A-4-33-40-41-42-43-34-44), extension:ml, file:miniml_parse.ml, not_hygienic, ocaml, ocamldep, quiet, strict-sequence, thread, traverse, use_str, use_unix }
+ocamlfind ocamldep -modules miniml_parse.ml > miniml_parse.ml.depends # cached
+# Target: miniml_parse.cmo, tags: { warn(A-4-33-40-41-42-43-34-44), byte, compile, extension:cmo, extension:ml, file:miniml_parse.cmo, file:miniml_parse.ml, implem, not_hygienic, ocaml, quiet, strict-sequence, thread, traverse, use_str, use_unix }
+ocamlfind ocamlc -c -thread -strict-sequence -w A-4-33-40-41-42-43-34-44 -o miniml_parse.cmo miniml_parse.ml # cached
+# Target: miniml.byte, tags: { warn(A-4-33-40-41-42-43-34-44), byte, dont_link_with, extension:byte, file:miniml.byte, link, not_hygienic, ocaml, program, quiet, strict-sequence, thread, traverse, use_str, use_unix }
+ocamlfind ocamlc -linkpkg unix.cma str.cma -thread expr.cmo evaluation.cmo miniml_parse.cmo miniml_lex.cmo miniml.cmo -o miniml.byte # cached
 # Compilation successful.
