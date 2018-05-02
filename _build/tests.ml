@@ -46,7 +46,7 @@ let _ =
     "(5 > x)");
   assert (exp_to_concrete_string
     (Let("f", Fun("x", Binop(Plus, Var("x"), Num 3)), App(Var("f"), Num(3)))) =
-    "Let(f, Fun(x, (x + 3)), App(f, 3))") ;
+    "Let f = Fun x -> (x + 3) in App f to 3");
   assert (exp_to_concrete_string (Binop(Equals, Num 5, Unop(Negate, Num 5))) =
     "(5 = -5)");
   assert (exp_to_concrete_string Raise = "Raise");

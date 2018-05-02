@@ -59,7 +59,7 @@ module Env : Env_type =
        variable varid to loc *)
     let extend (env : env) (varname : varid) (loc : value ref) : env =
       let new_env = List.remove_assoc varname env in
-        (varname, loc) :: new_env ;;
+      (varname, loc) :: new_env ;;
 
     (* Returns a printable string representation of a value; the flag
        printenvp determines whether to include the environment in the
@@ -112,7 +112,6 @@ let unop_eval (u, e) : expr =
   match u with
   | Negate -> (match e with
                | Num x -> Num (~-x)
-               | Bool x -> Bool (not x)
                | _ -> raise (EvalError "Invalid unop type"));;
 
 let binop_eval (b, e, e1) : expr =
@@ -226,4 +225,4 @@ let rec eval_l (exp : expr) (env : Env.env) : Env.value =
    above, not the evaluate function, so it doesn't matter how it's set
    when you submit your solution.) *)
 
-let evaluate = eval_l ;;
+let evaluate = eval_t ;;

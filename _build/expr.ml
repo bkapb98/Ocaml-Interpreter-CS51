@@ -67,18 +67,15 @@ let vars_of_list : string list -> varidset =
 let rec free_vars (exp : expr) : varidset =
   match exp with
   | Var x -> SS.singleton x
-  | Num _ -> SS.empty
-  | Bool _ -> SS.empty
+  | Num _ | Bool _ | Raise | Unassigned -> SS.empty
   | Unop (_, e) -> free_vars e
   | Binop (_, e, e1) -> SS.union (free_vars e) (free_vars e1)
   | Conditional (e, e1, e2) ->
-    SS.union (SS.union (free_vars e) (free_vars e1)) (free_vars e2)
+      SS.union (SS.union (free_vars e) (free_vars e1)) (free_vars e2)
   | Fun (x, e) -> SS.remove x (free_vars e)
   | Let (x, e, e1) -> SS.union (free_vars e) (SS.remove x (free_vars e1))
   | Letrec (x, e, e1) ->
-    SS.union (SS.remove x (free_vars e)) (SS.remove x (free_vars e1))
-  | Raise -> SS.empty
-  | Unassigned -> SS.empty
+      SS.union (SS.remove x (free_vars e)) (SS.remove x (free_vars e1))
   | App (e, e1) -> SS.union (free_vars e) (free_vars e1) ;;
 
 
@@ -87,13 +84,12 @@ let rec free_vars (exp : expr) : varidset =
    gensym. Assumes no variable names use the prefix "var". (Otherwise,
    they might accidentally be the same as a generated variable name.) *)
 (* taken from lab5  *)
-let new_varname () : varid =
-  let gensym =
+let new_varname =
   let ctr = ref 0 in
-  fun (s : string) ->
-    let v = s ^ string_of_int (!ctr) in
-    ctr := !ctr + 1;
-    v in gensym "y" ;;
+  fun () : varid ->
+    let v = !ctr in
+      ctr := !ctr + 1;
+      "x" ^ (string_of_int v);;
 
 (*......................................................................
   Substitution
@@ -108,32 +104,29 @@ let new_varname () : varid =
 let rec subst (var_name : varid) (repl : expr) (exp : expr) : expr =
   match exp with
   | Var x -> if var_name = x then repl else exp
-  | Num _ -> exp
-  | Bool _ -> exp
+  | Num _ | Bool _ | Raise | Unassigned -> exp
   | Unop (u, e) -> Unop(u, subst var_name repl e)
   | Binop (b, e, e1) ->
-    Binop (b, subst var_name repl e, subst var_name repl e1)
+      Binop (b, subst var_name repl e, subst var_name repl e1)
   | Conditional (e, e1, e2) -> Conditional (subst var_name repl e,
     subst var_name repl e1, subst var_name repl e2)
   | Fun (x, e) ->
-    if var_name = x then exp
-    else if SS.mem x (free_vars repl) then subst (new_varname()) repl exp
-    else Fun (x, subst var_name repl e)
+      if var_name = x then exp
+      else if SS.mem x (free_vars repl) then subst (new_varname()) repl exp
+      else Fun (x, subst var_name repl e)
   | Let (x, e, e1) ->
-    if var_name = x then exp
-    else if SS.mem x (free_vars repl) then
-      let a = new_varname() in
-      Let (a, e, subst var_name repl (subst x (Var a) e1))
-    else Let (x, subst var_name repl e, subst var_name repl e1)
+      if var_name = x then exp
+      else if SS.mem x (free_vars repl) then
+        let a = new_varname() in
+        Let (a, e, subst var_name repl (subst x (Var a) e1))
+      else Let (x, subst var_name repl e, subst var_name repl e1)
   | Letrec (x, e, e1) ->
-    if var_name = x then exp
-    else if SS.mem x (free_vars repl) then
-      let a = new_varname() in
-      Letrec (a, subst var_name repl (subst x (Var a) e),
+      if var_name = x then exp
+      else if SS.mem x (free_vars repl) then
+        let a = new_varname() in
+        Letrec (a, subst var_name repl (subst x (Var a) e),
         subst var_name repl (subst x (Var a) e1))
-    else Letrec (x, subst var_name repl e, subst var_name repl e1)
-  | Raise -> Raise
-  | Unassigned -> Unassigned
+      else Letrec (x, subst var_name repl e, subst var_name repl e1)
   | App (e, e1) -> App (subst var_name repl e, subst var_name repl e1);;
 
 (*......................................................................
@@ -165,15 +158,15 @@ let rec exp_to_concrete_string (exp : expr) : string =
     "(if" ^ "(" ^ exp_to_concrete_string e ^ ")" ^ "then" ^ "(" ^
      exp_to_concrete_string e1 ^ ")"  ^ "else" ^ "(" ^ exp_to_concrete_string e2
       ^ ")"  ^ ")"
-  | Fun (x, e) -> "Fun(" ^ x ^ ", " ^ exp_to_concrete_string e ^ ")"
-  | Let (x, e, e1) -> "Let(" ^ x  ^ ", " ^ exp_to_concrete_string  e ^ ", " ^
-    exp_to_concrete_string  e1 ^  ")"
-  | Letrec (x, e, e1) -> "Letrec(" ^ x  ^ ", " ^ exp_to_concrete_string  e ^
-    ", " ^ exp_to_concrete_string  e1 ^  ")"
+  | Fun (x, e) -> "Fun " ^ x ^ " -> " ^ exp_to_concrete_string e
+  | Let (x, e, e1) -> "Let " ^ x  ^ " = " ^ exp_to_concrete_string  e ^ " in " ^
+    exp_to_concrete_string  e1
+  | Letrec (x, e, e1) -> "Letrec " ^ x  ^ " = " ^ exp_to_concrete_string  e ^
+    " in " ^ exp_to_concrete_string e1
   | Raise -> "Raise"
   | Unassigned -> "Unassigned"
-  | App (e, e1) -> "App(" ^ exp_to_concrete_string e ^ ", " ^
-    exp_to_concrete_string  e1 ^  ")" ;;
+  | App (e, e1) -> "App " ^ exp_to_concrete_string e ^ " to " ^
+    exp_to_concrete_string  e1 ;;
 
 (* exp_to_abstract_string : expr -> string
    Returns a string representation of the abstract syntax of the expr *)
