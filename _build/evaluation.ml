@@ -50,8 +50,10 @@ module Env : Env_type =
 
     (* Looks up the value of a variable in the environment *)
     let lookup (env : env) (varname : varid) : value =
-      try let _, y = List.find (fun (x, _) -> x = varname) env in !y
-      with Not_found -> raise (EvalError "var not found") ;;
+      try
+        let _, y = List.find (fun (x, _) -> x = varname) env in !y
+      with
+        Not_found -> raise (EvalError "var not found") ;;
 
     (* Returns a new environment just like env except that it maps the
        variable varid to loc *)
@@ -106,36 +108,30 @@ let eval_t (exp : expr) (_env : Env.env) : Env.value =
 
 (* I realized that unop, binop can be abstracted and used in both eval_s, eval_d
    so i took them out and wrote smaller functions for them *)
-let unop_eval (exp : expr) : expr =
-  match exp with
-  | Unop (u, e) ->
-    (match u with
-     | Negate -> match e with
-                 | Num x -> Num (~-x)
-                 | Bool x -> Bool (not x)
-                 | _ -> raise (EvalError "Invalid unop type"))
-  | _ -> raise (EvalError "invalid type") ;;
+let unop_eval (u, e) : expr =
+  match u with
+  | Negate -> (match e with
+               | Num x -> Num (~-x)
+               | Bool x -> Bool (not x)
+               | _ -> raise (EvalError "Invalid unop type"));;
 
-let binop_eval (exp : expr) : expr =
-match exp with
-  | Binop (b, e, e1) ->
-    (match e, e1 with
-     | Num y, Num z ->
-       (match b with
-        | Plus -> Num (y + z)
-        | Minus -> Num (y - z)
-        | Times -> Num (y * z)
-        | Divide -> Num (y / z)
-        | Equals -> Bool (y = z)
-        | LessThan -> Bool (y < z)
-        | GreaterThan -> Bool (y > z))
-     | Bool y, Bool z ->
-       (match b with
-        | Equals -> Bool (y = z)
-        | LessThan -> Bool (y < z)
-        | _ -> raise (EvalError "This binop can not be used with type Bool"))
-     | _ -> raise (EvalError "Binop's only take Nums or Bools"))
-  | _ -> raise (EvalError "invalid type") ;;
+let binop_eval (b, e, e1) : expr =
+  match e, e1 with
+  | Num y, Num z ->
+    (match b with
+     | Plus -> Num (y + z)
+     | Minus -> Num (y - z)
+     | Times -> Num (y * z)
+     | Divide -> Num (y / z)
+     | Equals -> Bool (y = z)
+     | LessThan -> Bool (y < z)
+     | GreaterThan -> Bool (y > z))
+  | Bool y, Bool z ->
+    (match b with
+     | Equals -> Bool (y = z)
+     | LessThan -> Bool (y < z)
+     | _ -> raise (EvalError "This binop can not be used with type Bool"))
+  | _ -> raise (EvalError "Binop's only evaluate with Nums or Bools");;
 
 (* The SUBSTITUTION MODEL evaluator -- to be completed *)
 (* added helper function so that I can return expr and not deal with values *)
@@ -144,8 +140,8 @@ let eval_s (exp : expr) (_env : Env.env) : Env.value =
   match exp with
   | Var _ -> raise (EvalError "Doesn't evaluate")
   | Num _  | Bool _ | Fun (_, _) -> exp
-  | Unop (u, e) -> unop_eval (Unop (u, help e))
-  | Binop (b, e, e1) -> binop_eval (Binop (b, help e, help e1))
+  | Unop (u, e) -> unop_eval (u, help e)
+  | Binop (b, e, e1) -> binop_eval (b, help e, help e1)
   | Conditional (e, e1, e2) ->
     (match help e with
      | Bool x -> if x then help e1 else help e2
@@ -175,8 +171,8 @@ let eval_d (exp : expr) (env : Env.env) : Env.value =
     match exp with
     | Var x -> val_to_exp (Env.lookup env x)
     | Num _  | Bool _ | Fun (_, _) | Unassigned -> exp
-    | Unop (u, e) -> unop_eval (Unop (u, (help e env)))
-    | Binop (b, e, e1) -> binop_eval (Binop (b, (help e env), (help e1 env)))
+    | Unop (u, e) -> unop_eval (u, (help e env))
+    | Binop (b, e, e1) -> binop_eval (b, (help e env), (help e1 env))
     | Conditional (e, e1, e2) ->
       (match help e env with
        | Bool x -> if x then help e1 env else help e2 env
@@ -200,9 +196,9 @@ let rec eval_l (exp : expr) (env : Env.env) : Env.value =
   match exp with
   | Var x -> Env.lookup env x
   | Num _  | Bool _ | Unassigned -> Env.Val exp
-  | Unop (u, e) -> Env.Val (unop_eval (Unop (u, val_to_exp (eval_l e env))))
+  | Unop (u, e) -> Env.Val (unop_eval (u, val_to_exp (eval_l e env)))
   | Binop (b, e, e1) -> Env.Val (binop_eval
-      (Binop (b, val_to_exp (eval_l e env), val_to_exp (eval_l e1 env))))
+      (b, val_to_exp (eval_l e env), val_to_exp (eval_l e1 env)))
   | Conditional (e, e1, e2) ->
     (match eval_l e env with
      | Val (Bool x) -> if x then eval_l e1 env else eval_l e2 env

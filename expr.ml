@@ -74,7 +74,7 @@ let rec free_vars (exp : expr) : varidset =
   | Conditional (e, e1, e2) ->
     SS.union (SS.union (free_vars e) (free_vars e1)) (free_vars e2)
   | Fun (x, e) -> SS.remove x (free_vars e)
-  | Let (x, e, e1) -> SS.union (SS.remove x (free_vars e1)) (free_vars e)
+  | Let (x, e, e1) -> SS.union (free_vars e) (SS.remove x (free_vars e1))
   | Letrec (x, e, e1) ->
     SS.union (SS.remove x (free_vars e)) (SS.remove x (free_vars e1))
   | Raise -> SS.empty
@@ -117,7 +117,7 @@ let rec subst (var_name : varid) (repl : expr) (exp : expr) : expr =
     subst var_name repl e1, subst var_name repl e2)
   | Fun (x, e) ->
     if var_name = x then exp
-    else if SS.mem x (free_vars repl) then (subst (new_varname()) repl exp)
+    else if SS.mem x (free_vars repl) then subst (new_varname()) repl exp
     else Fun (x, subst var_name repl e)
   | Let (x, e, e1) ->
     if var_name = x then exp
@@ -144,16 +144,15 @@ let rec subst (var_name : varid) (repl : expr) (exp : expr) : expr =
 (* exp_to_concrete_string : expr -> string
    Returns a concrete syntax string representation of the expr *)
 (* used a helper function with a shorter name to make the code easier to read *)
-let exp_to_concrete_string (exp : expr) : string =
-  let rec help (exp : expr) : string =
+let rec exp_to_concrete_string (exp : expr) : string =
   match exp with
   | Var x -> x
   | Num x -> string_of_int x
   | Bool x -> string_of_bool x
   | Unop (u, e) ->
     (match u with
-     | Negate -> "-") ^ help e
-  | Binop (b, e, e1) -> "(" ^ help e ^
+     | Negate -> "-") ^ exp_to_concrete_string  e
+  | Binop (b, e, e1) -> "(" ^ exp_to_concrete_string e ^
     (match b with
      | Plus -> " + "
      | Minus -> " - "
@@ -161,19 +160,20 @@ let exp_to_concrete_string (exp : expr) : string =
      | Divide -> " / "
      | Equals -> " = "
      | LessThan -> " < "
-     | GreaterThan -> " > ")  ^ help e1 ^ ")"
+     | GreaterThan -> " > ")  ^ exp_to_concrete_string e1 ^ ")"
   | Conditional (e, e1, e2) ->
-    "(if" ^ "(" ^ help e ^ ")" ^ "then" ^ "(" ^ help e1 ^ ")"  ^
-     "else" ^ "(" ^ help e2 ^ ")"  ^ ")"
-  | Fun (x, e) -> "Fun(" ^ x ^ ", " ^ help e ^ ")"
-  | Let (x, e, e1) -> "Let(" ^ x  ^ ", " ^ help e ^ ", " ^
-    help e1 ^  ")"
-  | Letrec (x, e, e1) -> "Letrec(" ^ x  ^ ", " ^ help e ^
-    ", " ^ help e1 ^  ")"
+    "(if" ^ "(" ^ exp_to_concrete_string e ^ ")" ^ "then" ^ "(" ^
+     exp_to_concrete_string e1 ^ ")"  ^ "else" ^ "(" ^ exp_to_concrete_string e2
+      ^ ")"  ^ ")"
+  | Fun (x, e) -> "Fun(" ^ x ^ ", " ^ exp_to_concrete_string e ^ ")"
+  | Let (x, e, e1) -> "Let(" ^ x  ^ ", " ^ exp_to_concrete_string  e ^ ", " ^
+    exp_to_concrete_string  e1 ^  ")"
+  | Letrec (x, e, e1) -> "Letrec(" ^ x  ^ ", " ^ exp_to_concrete_string  e ^
+    ", " ^ exp_to_concrete_string  e1 ^  ")"
   | Raise -> "Raise"
   | Unassigned -> "Unassigned"
-  | App (e, e1) -> "App(" ^ help e ^ ", " ^
-    help e1 ^  ")" in help exp ;;
+  | App (e, e1) -> "App(" ^ exp_to_concrete_string e ^ ", " ^
+    exp_to_concrete_string  e1 ^  ")" ;;
 
 (* exp_to_abstract_string : expr -> string
    Returns a string representation of the abstract syntax of the expr *)
