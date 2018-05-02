@@ -1,4 +1,4 @@
-(* 
+(*
                          CS 51 Final Project
                     MiniML -- Read-Eval-Print Loop
                              Spring 2018
@@ -33,13 +33,13 @@ let repl () =
         (* prompt *)
         printf "<== ";
         flush stdout;
-        
+
         (* read and parse an expression from the input *)
         let exp = MP.input ML.token lexbuf in
-        
+
         (* evaluate it *)
         let res = Ev.evaluate exp env in
-           
+
         (* print the result; in this initial version, the trivial
            evaluator just returns the expression unchanged as an
            element of the Env.value type (found in expr.ml), so we
@@ -48,7 +48,7 @@ let repl () =
         | Val resexp ->
            printf "==> %s\n" (Ex.exp_to_abstract_string resexp)
         | _ -> failwith "not handling other cases yet"
-           
+
       with
       | Parsing.Parse_error -> printf "xx> parse error\n"
       | Ev.EvalError msg -> printf "xx> evaluation error: %s\n" msg
@@ -58,10 +58,11 @@ let repl () =
     flush stdout
   done
 ;;
-        
+
 (* Run REPL if called from command line *)
 
 try
-  let _ = Str.search_forward (Str.regexp "miniml\\.\\(byte\\|native\\)") (Sys.argv.(0)) 0 in
+  let _ = Str.search_forward (Str.regexp "miniml\\.\\(byte\\|native\\)")
+  (Sys.argv.(0)) 0 in
   repl ()
 with Not_found -> () ;;
