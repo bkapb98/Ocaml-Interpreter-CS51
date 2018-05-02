@@ -130,6 +130,7 @@ let binop_eval (b, e, e1) : expr =
     (match b with
      | Equals -> Bool (y = z)
      | LessThan -> Bool (y < z)
+     | GreaterThan -> Bool (y > z)
      | _ -> raise (EvalError "This binop can not be used with type Bool"))
   | _ -> raise (EvalError "Binop's only evaluate with Nums or Bools");;
 
@@ -170,7 +171,7 @@ let eval_d (exp : expr) (env : Env.env) : Env.value =
   let rec help (exp : expr) (env : Env.env) : expr =
     match exp with
     | Var x -> val_to_exp (Env.lookup env x)
-    | Num _  | Bool _ | Fun (_, _) | Unassigned -> exp
+    | Num _  | Bool _ | Fun _ | Unassigned -> exp
     | Unop (u, e) -> unop_eval (u, (help e env))
     | Binop (b, e, e1) -> binop_eval (b, (help e env), (help e1 env))
     | Conditional (e, e1, e2) ->
