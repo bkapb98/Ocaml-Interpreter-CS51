@@ -140,7 +140,7 @@ let eval_s (exp : expr) (_env : Env.env) : Env.value =
   let rec help (exp : expr) : expr =
   match exp with
   | Var _ -> raise (EvalError "Doesn't evaluate")
-  | Num _  | Bool _ | Fun (_, _) -> exp
+  | Num _  | Bool _ | Fun _ -> exp
   | Unop (u, e) -> unop_eval (u, help e)
   | Binop (b, e, e1) -> binop_eval (b, help e, help e1)
   | Conditional (e, e1, e2) ->
@@ -198,13 +198,13 @@ let rec eval_l (exp : expr) (env : Env.env) : Env.value =
   | Var x -> Env.lookup env x
   | Num _  | Bool _ | Unassigned -> Env.Val exp
   | Unop (u, e) -> Env.Val (unop_eval (u, val_to_exp (eval_l e env)))
-  | Binop (b, e, e1) -> Env.Val (binop_eval
-      (b, val_to_exp (eval_l e env), val_to_exp (eval_l e1 env)))
+  | Binop (b, e, e1) -> Env.Val
+    (binop_eval (b, val_to_exp (eval_l e env), val_to_exp (eval_l e1 env)))
   | Conditional (e, e1, e2) ->
     (match eval_l e env with
      | Val (Bool x) -> if x then eval_l e1 env else eval_l e2 env
      | _ -> raise (EvalError "first term of conditional must be bool"))
-  | Fun (_, _) -> Closure (exp, env)
+  | Fun _ -> Env.close exp env
   | Let (x, e, e1) -> eval_l e1 (Env.extend env x (ref (eval_l e env)))
   | Letrec (x, e, e1) ->
     let rf = ref (Env.Val Unassigned) in
@@ -226,4 +226,4 @@ let rec eval_l (exp : expr) (env : Env.env) : Env.value =
    above, not the evaluate function, so it doesn't matter how it's set
    when you submit your solution.) *)
 
-let evaluate = eval_s ;;
+let evaluate = eval_l ;;

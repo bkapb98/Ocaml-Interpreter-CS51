@@ -226,4 +226,4 @@ let rec eval_l (exp : expr) (env : Env.env) : Env.value =
    above, not the evaluate function, so it doesn't matter how it's set
    when you submit your solution.) *)
 
-let evaluate = eval_s ;;
+let evaluate = eval_l ;;
